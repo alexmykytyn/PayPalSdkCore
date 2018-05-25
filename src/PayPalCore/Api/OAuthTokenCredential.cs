@@ -4,7 +4,7 @@ using System.Text;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PayPal.Log;
+
 
 namespace PayPal.Api
 {
@@ -100,7 +100,7 @@ namespace PayPal.Api
             this.config = config != null ? ConfigManager.GetConfigWithDefaults(config) : ConfigManager.GetConfigWithDefaults(ConfigManager.Instance.GetProperties());
 
             // Set the client ID.
-            if(string.IsNullOrEmpty(clientId))
+            if (string.IsNullOrEmpty(clientId))
             {
                 this.ClientId = this.config.ContainsKey(BaseConstants.ClientId) ? this.config[BaseConstants.ClientId] : string.Empty;
             }
@@ -111,7 +111,7 @@ namespace PayPal.Api
             }
 
             // Set the client secret.
-            if(string.IsNullOrEmpty(clientSecret))
+            if (string.IsNullOrEmpty(clientSecret))
             {
                 this.ClientSecret = this.config.ContainsKey(BaseConstants.ClientSecret) ? this.config[BaseConstants.ClientSecret] : string.Empty;
             }
@@ -175,7 +175,7 @@ namespace PayPal.Api
             {
                 Config = this.config,
                 SdkVersion = this.SdkVersion,
-                HTTPHeaders = new Dictionary<string,string>
+                HTTPHeaders = new Dictionary<string, string>
                 {
                     { BaseConstants.ContentTypeHeader, BaseConstants.ContentTypeHeaderFormUrlEncoded }
                 }

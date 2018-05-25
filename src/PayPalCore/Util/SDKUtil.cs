@@ -1,11 +1,12 @@
 using System;
-using System.Web;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using PayPal.Api;
 using Microsoft.Win32;
+using System.Reflection;
 
 namespace PayPal.Util
 {
@@ -108,7 +109,7 @@ namespace PayPal.Util
                 }
                 foreach (KeyValuePair<string, string> entry in queryParameters)
                 {
-                    stringBuilder.Append(HttpUtility.UrlEncode(entry.Key, Encoding.UTF8)).Append("=").Append(HttpUtility.UrlEncode(entry.Value, Encoding.UTF8)).Append("&");
+                    stringBuilder.Append(WebUtility.UrlEncode(entry.Key)).Append("=").Append(WebUtility.UrlEncode(entry.Value)).Append("&");
                 }
                 formattedURIPath = stringBuilder.ToString();
             }
@@ -178,9 +179,9 @@ namespace PayPal.Util
             string[] query = pattern.Split('?');
             if (query.Length == 2 && query[1].Contains("={"))
             {
-                NameValueCollection queryParts = HttpUtility.ParseQueryString(query[1]);
+                var queryParts = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(query[1]);
 
-                foreach (string k in queryParts.AllKeys)
+                foreach (string k in queryParts.Keys)
                 {
                     string val = string.Empty;
                     if (parameters.TryGetValue(k.Trim(), out val))
@@ -291,9 +292,10 @@ namespace PayPal.Util
         /// <returns>A 3-digit version of the parent assembly.</returns>
         public static string GetAssemblyVersionForType(Type type)
         {
-            return type.Assembly.GetName().Version.ToString(3);
+            return type.GetType().GetTypeInfo().Assembly.GetName().Version.ToString(3);
         }
 
+#if NET40
         /// <summary>
         /// Checks if .NET 4.5 or later is detected on the system.
         /// </summary>
@@ -303,7 +305,6 @@ namespace PayPal.Util
             var highestNetVersion = GetHighestInstalledNetVersion();
             return highestNetVersion != null && highestNetVersion >= new Version(4, 5, 0, 0);
         }
-
         /// <summary>
         /// Gets the highest installed version of the .NET framework found on the system.
         /// </summary>
@@ -361,7 +362,7 @@ namespace PayPal.Util
 
             return highestNetVersion;
         }
-
+#endif
         #region Obsolete Methods
         /// <summary>
         /// Gets the resource token from an approval URL HATEOAS link, if found.
