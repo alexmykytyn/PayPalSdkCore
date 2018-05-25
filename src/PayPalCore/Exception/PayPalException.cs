@@ -1,5 +1,3 @@
-using PayPal.Log;
-
 namespace PayPal
 {
     /// <summary>
@@ -10,7 +8,7 @@ namespace PayPal
         /// <summary>
         /// Logs output statements, errors, debug info to a text file
         /// </summary>
-        private static Logger logger = Logger.GetLogger(typeof(PayPalException));
+        //private static Logger logger = Logger.GetLogger(typeof(PayPalException));
 
         /// <summary>
         /// Initializes a new <seealso cref="PayPalException"/> with no exception details set.
@@ -21,7 +19,7 @@ namespace PayPal
         /// Represents errors that occur during application execution
         /// </summary>
         /// <param name="message">The message that describes the error</param>
-        public PayPalException(string message): this(message, null) { }
+        public PayPalException(string message) : this(message, null) { }
 
         /// <summary>
         /// Initializes a new <seealso cref="PayPalException"/> and sets the exception message and cause.
@@ -62,15 +60,15 @@ namespace PayPal
         /// <param name="ex">Optional System.Exception object to include in the log message.</param>
         protected void LogMessage(string message, System.Exception ex)
         {
-            string errorMessage = string.IsNullOrEmpty(this.ExceptionMessagePrefix) ? message : string.Format("{0}: {1}", this.ExceptionMessagePrefix, message);
-            if (ex == null)
-            {
-                logger.Error(errorMessage);
-            }
-            else
-            {
-                logger.Error(errorMessage, ex);
-            }
+            //string errorMessage = string.IsNullOrEmpty(this.ExceptionMessagePrefix) ? message : string.Format("{0}: {1}", this.ExceptionMessagePrefix, message);
+            //if (ex == null)
+            //{
+            //    logger.Error(errorMessage);
+            //}
+            //else
+            //{
+            //    logger.Error(errorMessage, ex);
+            //}
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using PayPal.Log;
 using System.Text;
 using System.Threading;
 
@@ -15,27 +14,7 @@ namespace PayPal.Api
         /// <summary>
         /// Logs output statements, errors, debug info to a text file
         /// </summary>
-        private static Logger logger = Logger.GetLogger(typeof(PayPalResource));
-
-        /// <summary>
-        /// PayPal debug id from response header
-        /// </summary>
-        private String _debugId;
-        /// <summary>
-        /// Sets the PayPal debug id from response header
-        /// </summary>
-        protected void SetDebugId(string debugId)
-        {
-            _debugId = debugId;
-        }
-        /// <summary>
-        /// Gets the PayPal debug id of the last request from the response header. 
-        //  The debug id value can change if additional API operations are performed on the object. 
-        /// </summary>
-        public String GetDebugId()
-        {
-            return _debugId;
-        }
+        //private static Logger logger = Logger.GetLogger(typeof(PayPalResource));
 
         /// <summary>
         /// List of supported HTTP methods when making HTTP requests to the PayPal REST API.
@@ -137,7 +116,7 @@ namespace PayPal.Api
                 var config = apiContext.GetConfigWithDefaults();
                 var headersMap = GetHeaderMap(apiContext);
 
-                if(!setAuthorizationHeader && headersMap.ContainsKey(BaseConstants.AuthorizationHeader))
+                if (!setAuthorizationHeader && headersMap.ContainsKey(BaseConstants.AuthorizationHeader))
                 {
                     headersMap.Remove(BaseConstants.AuthorizationHeader);
                 }
@@ -178,21 +157,21 @@ namespace PayPal.Api
                     //iso-8859-1
                     var iso8851 = Encoding.GetEncoding("iso-8859-1", new EncoderReplacementFallback(string.Empty), new DecoderExceptionFallback());
                     var bytes = Encoding.Convert(Encoding.UTF8, iso8851, Encoding.UTF8.GetBytes(headersMap[BaseConstants.UserAgentHeader]));
-                    httpRequest.UserAgent = iso8851.GetString(bytes);
+                    httpRequest.Headers["User-Agent"] = iso8851.GetString(bytes);
                     headersMap.Remove(BaseConstants.UserAgentHeader);
                 }
 
                 // Set Custom HTTP headers
                 foreach (KeyValuePair<string, string> entry in headersMap)
                 {
-                    httpRequest.Headers.Add(entry.Key, entry.Value);
+                    httpRequest.Headers[entry.Key] = entry.Value;
                 }
 
                 // Log the headers
-                foreach (string headerName in httpRequest.Headers)
-                {
-                    logger.DebugFormat(headerName + ":" + httpRequest.Headers[headerName]);
-                }
+                //foreach (string headerName in httpRequest.Headers)
+                //{
+                //    logger.DebugFormat(headerName + ":" + httpRequest.Headers[headerName]);
+                //}
 
                 // Execute call
                 var connectionHttp = new HttpConnection(config);
@@ -201,7 +180,7 @@ namespace PayPal.Api
                 LastRequestDetails.Value = connectionHttp.RequestDetails;
                 LastResponseDetails.Value = connectionHttp.ResponseDetails;
 
-                var response = connectionHttp.Execute(payload, httpRequest);
+                var response = connectionHttp.Execute(payload, httpRequest).Result;
 
                 if (typeof(T).Name.Equals("Object"))
                 {
@@ -212,16 +191,7 @@ namespace PayPal.Api
                     return (T)Convert.ChangeType(response, typeof(T));
                 }
 
-                var formattedResponse = JsonFormatter.ConvertFromJson<T>(response);
-                if (formattedResponse is PayPalResource)
-                {
-                    var responseHeaders = connectionHttp.ResponseDetails.Headers;
-                    String debugId = responseHeaders.Get("PayPal-Debug-Id");
-                    ((PayPalResource)(object)formattedResponse).SetDebugId(debugId);
-
-                }
-
-                return formattedResponse;
+                return JsonFormatter.ConvertFromJson<T>(response);
             }
             catch (ConnectionException ex)
             {
@@ -268,11 +238,11 @@ namespace PayPal.Api
         {
             var headers = new Dictionary<string, string>();
 
-		    // The implementation is PayPal specific. The Authorization header is
-		    // formed for OAuth or Basic, for OAuth system the authorization token
-		    // passed as a parameter is used in creation of HTTP header, for Basic
-		    // Authorization the ClientID and ClientSecret passed as parameters are
-		    // used after a Base64 encoding.
+            // The implementation is PayPal specific. The Authorization header is
+            // formed for OAuth or Basic, for OAuth system the authorization token
+            // passed as a parameter is used in creation of HTTP header, for Basic
+            // Authorization the ClientID and ClientSecret passed as parameters are
+            // used after a Base64 encoding.
             if (!string.IsNullOrEmpty(apiContext.AccessToken))
             {
                 headers[BaseConstants.AuthorizationHeader] = apiContext.AccessToken;

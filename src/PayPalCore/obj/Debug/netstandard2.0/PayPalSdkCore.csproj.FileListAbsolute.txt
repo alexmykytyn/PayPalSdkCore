@@ -1,3 +1,9 @@
 C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.csproj.CoreCompileInputs.cache
 C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.AssemblyInfoInputs.cache
 C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.AssemblyInfo.cs
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\bin\Debug\netstandard2.0\PayPalSdkCore.deps.json
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\bin\Debug\netstandard2.0\PayPalSdkCore.dll
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\bin\Debug\netstandard2.0\PayPalSdkCore.pdb
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.dll
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.pdb
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.csprojAssemblyReference.cache

@@ -1,11 +1,12 @@
 using PayPal.Api;
-using PayPal.Log;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -20,7 +21,7 @@ namespace PayPal
         /// <summary>
         /// Logger
         /// </summary>
-        private static Logger logger = Logger.GetLogger(typeof(CertificateManager));
+        //private static Logger logger = Logger.GetLogger(typeof(CertificateManager));
 
         /// <summary>
         /// Cache of X509 certificates.
@@ -74,13 +75,13 @@ namespace PayPal
         public X509Certificate2Collection GetCertificatesFromUrl(string certUrl)
         {
             // If we haven't already cached this URL, then download, verify, and cache it.
-            if(!certificates.ContainsKey(certUrl))
+            if (!certificates.ContainsKey(certUrl))
             {
                 // Download the certificate.
                 string certData;
-                using (var webClient = new WebClient())
+                using (var httpClient = new HttpClient())
                 {
-                    certData = webClient.DownloadString(certUrl);
+                    certData = httpClient.GetStringAsync(certUrl).Result;
                 }
 
                 // Load all the certificates.
@@ -96,11 +97,11 @@ namespace PayPal
                     if (!string.IsNullOrEmpty(trimmed))
                     {
                         var certificate = new X509Certificate2(System.Text.Encoding.UTF8.GetBytes(trimmed));
-
+                        // TODO: Complete
                         // Verify the certificate before adding it to the collection.
                         if(certificate.Verify())
                         {
-                            collection.Add(certificate);
+                        collection.Add(certificate);
                         }
                         else
                         {
@@ -129,14 +130,14 @@ namespace PayPal
                     return new X509Certificate2(File.ReadAllBytes(config[BaseConstants.TrustedCertificateLocation]));
                 }
 
-                using (var reader = Assembly.GetExecutingAssembly().GetManifestResourceStream("PayPal.Resources.DigiCertSHA2ExtendedValidationServerCA.crt"))
+                using (var reader = typeof(CertificateManager).GetTypeInfo().Assembly.GetManifestResourceStream("PayPal.Resources.DigiCertSHA2ExtendedValidationServerCA.crt"))
                 using (var memoryStream = new MemoryStream())
                 {
                     reader.CopyTo(memoryStream);
                     return new X509Certificate2(memoryStream.ToArray());
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new PayPalException("Unable to load trusted certificate.", ex);
             }
@@ -169,14 +170,15 @@ namespace PayPal
 
             // Verify the chain not only includes verified certificates, but
             // also includes a match to the provided trusted certificate.
-            foreach(var chainElement in chain.ChainElements)
+            foreach (var chainElement in chain.ChainElements)
             {
-                if(!chainElement.Certificate.Verify())
+                // TODO: COmplete
+                if (!chainElement.Certificate.Verify())
                 {
                     return false;
                 }
 
-                if(chainElement.Certificate.Thumbprint == trustedCert.Thumbprint)
+                if (chainElement.Certificate.Thumbprint == trustedCert.Thumbprint)
                 {
                     // The trusted certificate has been found, so we don't need
                     // to venture any further up the chain.

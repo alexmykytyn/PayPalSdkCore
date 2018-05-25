@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Net;
 using System.IO;
-using System.Globalization;
-using PayPal.Log;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace PayPal.Api
 {
@@ -92,7 +90,7 @@ namespace PayPal.Api
     /// </summary>
     internal class HttpConnection
     {
-        private static Logger logger = Logger.GetLogger(typeof(HttpConnection));
+        //private static Logger logger = Logger.GetLogger(typeof(HttpConnection));
         private Dictionary<string, string> config;
 
         /// <summary>
@@ -131,11 +129,12 @@ namespace PayPal.Api
             newHttpRequest.Method = httpRequest.Method;
             newHttpRequest.Accept = httpRequest.Accept;
             newHttpRequest.ContentType = httpRequest.ContentType;
+            // TODO: Complete
             if (httpRequest.ContentLength > 0)
             {
                 newHttpRequest.ContentLength = httpRequest.ContentLength;
             }
-            newHttpRequest.UserAgent = httpRequest.UserAgent;
+            newHttpRequest.Headers["User-Agent"] = httpRequest.Headers["User-Agent"];
             newHttpRequest.ClientCertificates = httpRequest.ClientCertificates;
             newHttpRequest = CopyHttpWebRequestHeaders(httpRequest, newHttpRequest);
             return newHttpRequest;
@@ -152,7 +151,7 @@ namespace PayPal.Api
             string[] allKeys = httpRequest.Headers.AllKeys;
             foreach (string key in allKeys)
             {
-                switch (key.ToLower(CultureInfo.InvariantCulture))
+                switch (key.ToLowerInvariant())
                 {
                     case "accept":
                     case "connection":
@@ -182,7 +181,7 @@ namespace PayPal.Api
         /// <param name="payLoad"></param>
         /// <param name="httpRequest"></param>
         /// <returns>A string containing the response from the remote host.</returns>
-        public string Execute(string payLoad, HttpWebRequest httpRequest)
+        public async Task<string> Execute(string payLoad, HttpWebRequest httpRequest)
         {
             int retriesConfigured = config.ContainsKey(BaseConstants.HttpConnectionRetryConfig) ?
                    Convert.ToInt32(config[BaseConstants.HttpConnectionRetryConfig]) : 0;
@@ -204,7 +203,7 @@ namespace PayPal.Api
                 {
                     if (retries > 0)
                     {
-                        logger.Info("Retrying....");
+                        //logger.Info("Retrying....");
                         httpRequest = CopyRequest(httpRequest, config, httpRequest.RequestUri.ToString());
                         this.RequestDetails.RetryAttempts++;
                     }
@@ -215,20 +214,21 @@ namespace PayPal.Api
                             case "POST":
                             case "PUT":
                             case "PATCH":
-                                using (StreamWriter writerStream = new StreamWriter(httpRequest.GetRequestStream()))
+                                using (Stream writerStream = await httpRequest.GetRequestStreamAsync())
                                 {
-                                    writerStream.Write(payLoad);
+                                    byte[] data = System.Text.Encoding.ASCII.GetBytes(payLoad);
+                                    writerStream.Write(data, 0, data.Length);
                                     writerStream.Flush();
-                                    writerStream.Close();
+                                    //writerStream.Close();
 
-                                    if (ConfigManager.IsLiveModeEnabled(config))
-                                    {
-                                        logger.Debug("Request details are hidden in live mode.");
-                                    }
-                                    else
-                                    {
-                                        logger.Debug(payLoad);
-                                    }
+                                    //if (ConfigManager.IsLiveModeEnabled(config))
+                                    //{
+                                    //    logger.Debug("Request details are hidden in live mode.");
+                                    //}
+                                    //else
+                                    //{
+                                    //    logger.Debug(payLoad);
+                                    //}
                                 }
                                 break;
 
@@ -236,11 +236,11 @@ namespace PayPal.Api
                                 break;
                         }
 
-                        using (WebResponse responseWeb = httpRequest.GetResponse())
+                        using (WebResponse responseWeb = await httpRequest.GetResponseAsync())
                         {
                             // Store the response information
                             this.ResponseDetails.Headers = responseWeb.Headers;
-                            if(responseWeb is HttpWebResponse)
+                            if (responseWeb is HttpWebResponse)
                             {
                                 this.ResponseDetails.StatusCode = ((HttpWebResponse)responseWeb).StatusCode;
                             }
@@ -249,15 +249,15 @@ namespace PayPal.Api
                             {
                                 this.ResponseDetails.Body = readerStream.ReadToEnd().Trim();
 
-                                if (ConfigManager.IsLiveModeEnabled(config))
-                                {
-                                    logger.Debug("Response details are hidden in live mode.");
-                                }
-                                else
-                                {
-                                    logger.Debug("Service response: ");
-                                    logger.Debug(this.ResponseDetails.Body);
-                                }
+                                //if (ConfigManager.IsLiveModeEnabled(config))
+                                //{
+                                //    logger.Debug("Response details are hidden in live mode.");
+                                //}
+                                //else
+                                //{
+                                //    logger.Debug("Service response: ");
+                                //    logger.Debug(this.ResponseDetails.Body);
+                                //}
                                 return this.ResponseDetails.Body;
                             }
                         }
@@ -271,11 +271,12 @@ namespace PayPal.Api
                             using (var readerStream = new StreamReader(ex.Response.GetResponseStream()))
                             {
                                 response = readerStream.ReadToEnd().Trim();
-                                logger.Error("Error response:");
-                                logger.Error(response);
+                                //logger.Error("Error response:");
+                                //logger.Error(response);
                             }
                         }
-                        logger.Error(ex.Message);
+
+                        //logger.Error(ex.Message);
 
                         ConnectionException rethrowEx = null;
 
@@ -289,7 +290,7 @@ namespace PayPal.Api
                             // If the HTTP status code is flagged as one where we
                             // should continue retrying, then ignore the exception
                             // and continue with the retry attempt.
-                            if(httpWebResponse.StatusCode == HttpStatusCode.GatewayTimeout ||
+                            if (httpWebResponse.StatusCode == HttpStatusCode.GatewayTimeout ||
                                httpWebResponse.StatusCode == HttpStatusCode.RequestTimeout ||
                                httpWebResponse.StatusCode == HttpStatusCode.BadGateway)
                             {
@@ -298,17 +299,17 @@ namespace PayPal.Api
 
                             rethrowEx = new HttpException(ex.Message, response, httpWebResponse.StatusCode, ex.Status, httpWebResponse.Headers, httpRequest);
                         }
-                        else if(ex.Status == WebExceptionStatus.ReceiveFailure ||
+                        else if (ex.Status == WebExceptionStatus.ReceiveFailure ||
                                 ex.Status == WebExceptionStatus.ConnectFailure ||
                                 ex.Status == WebExceptionStatus.KeepAliveFailure)
                         {
-                            logger.Debug("There was a problem connecting to the server: " + ex.Status.ToString());
+                            // logger.Debug("There was a problem connecting to the server: " + ex.Status.ToString());
                             continue;
                         }
                         else if (ex.Status == WebExceptionStatus.Timeout)
                         {
                             // For connection timeout errors, include the connection timeout value that was used.
-                            var message = string.Format("{0} (HTTP request timeout was set to {1}ms)", ex.Message, httpRequest.Timeout);
+                            var message = string.Format("{0} (HTTP request timeout was set to {1}ms)", ex.Message, httpRequest.ContinueTimeout);
                             rethrowEx = new ConnectionException(message, response, ex.Status, httpRequest);
                         }
                         else
@@ -317,7 +318,7 @@ namespace PayPal.Api
                             rethrowEx = new ConnectionException("Invalid HTTP response: " + ex.Message, response, ex.Status, httpRequest);
                         }
 
-                        if(ex.Response != null && ex.Response is HttpWebResponse)
+                        if (ex.Response != null && ex.Response is HttpWebResponse)
                         {
                             var httpWebResponse = ex.Response as HttpWebResponse;
                             this.ResponseDetails.StatusCode = httpWebResponse.StatusCode;

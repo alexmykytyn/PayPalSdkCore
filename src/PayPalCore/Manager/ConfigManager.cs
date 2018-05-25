@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using PayPal.Log;
+
 
 namespace PayPal.Api
 {
@@ -13,7 +12,7 @@ namespace PayPal.Api
         /// <summary>
         /// Logger
         /// </summary>
-        private static Logger logger = Logger.GetLogger(typeof(ConfigManager));
+        //private static Logger logger = Logger.GetLogger(typeof(ConfigManager));
 
         /// <summary>
         /// The configValue is readonly as it should not be changed outside constructor (but the content can)
@@ -60,7 +59,7 @@ namespace PayPal.Api
                 return singletonInstance;
             }
         }
-
+#if NET45
         /// <summary>
         /// Private constructor
         /// </summary>
@@ -88,7 +87,7 @@ namespace PayPal.Api
                 NameValueConfigurationCollection settings =
                     (NameValueConfigurationCollection)
                     paypalConfigSection.GetType().GetProperty("Settings").GetValue(paypalConfigSection, null);
-
+                
                 foreach (NameValueConfigurationElement setting in settings)
                 {
                     configValues.Add(setting.Name, setting.Value);
@@ -100,7 +99,7 @@ namespace PayPal.Api
                     (ConfigurationElementCollection)
                     paypalConfigSection.GetType().GetProperty("Accounts").GetValue(paypalConfigSection, null))
                 {
-                    Account account = (Account)element;
+                    Account account = (Account) element;
                     if (!string.IsNullOrEmpty(account.APIUserName))
                     {
                         this.configValues.Add("account" + index + ".apiUsername", account.APIUserName);
@@ -133,7 +132,7 @@ namespace PayPal.Api
                 }
             }
         }
-
+#endif
         /// <summary>
         /// Returns all properties from the config file
         /// </summary>
