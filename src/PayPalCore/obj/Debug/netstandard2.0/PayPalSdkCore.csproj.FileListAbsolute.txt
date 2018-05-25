@@ -1,0 +1,3 @@
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.csproj.CoreCompileInputs.cache
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.AssemblyInfoInputs.cache
+C:\Workspaces\PayPalSdkCore\src\PayPalCore\obj\Debug\netstandard2.0\PayPalSdkCore.AssemblyInfo.cs

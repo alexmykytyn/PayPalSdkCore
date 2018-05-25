@@ -1,0 +1,6 @@
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\obj\Debug\netstandard2.0\PayPalCore.csprojAssemblyReference.cache
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\obj\Debug\netstandard2.0\PayPalCore.csproj.CoreCompileInputs.cache
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\obj\Debug\netstandard2.0\PayPalCore.AssemblyInfoInputs.cache
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\obj\Debug\netstandard2.0\PayPalCore.AssemblyInfo.cs
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\bin\Debug\netstandard2.0\PayPalCore.deps.json
+c:\users\superuser\documents\visual studio 2017\Projects\PayPalCore\PayPalCore\bin\Debug\netstandard2.0\PayPalCore.dll
